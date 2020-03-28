@@ -24,16 +24,16 @@ public class RegisterFragment extends Fragment {
                 container, false);
         login_btn = (Button) view.findViewById(R.id.login);
         user = (EditText) view.findViewById(R.id.uname);
-        unamer = (TextView) view.findViewById(R.id.unamehead);
-        uemail = (TextView) view.findViewById(R.id.uemailhead);
+        unamer = (TextView) getActivity().findViewById(R.id.unamehead);
+        uemail = (TextView) getActivity().findViewById(R.id.uemailhead);
         pass = (EditText) view.findViewById(R.id.upass);
 
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity(),"Welcome "+user.getText().toString() ,Toast.LENGTH_SHORT).show();
-//                unamer.setText(""+user);
-//                uemail.setText(""+user+"@gmail.com");
+                unamer.setText(""+user.getText().toString());
+                uemail.setText(""+user.getText().toString()+"@gmail.com");
             }
         });
 
