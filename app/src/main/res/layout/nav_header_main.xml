@@ -25,12 +25,14 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:text="User Name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:id="@+id/unamehead"/>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/uemailhead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="email id here" />
+        android:text="email id here"
+        />
 
 </LinearLayout>
