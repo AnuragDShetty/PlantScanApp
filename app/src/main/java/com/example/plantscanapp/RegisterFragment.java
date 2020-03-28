@@ -20,21 +20,23 @@ public class RegisterFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        login_btn = (Button) container.findViewById(R.id.login);
-        user = (EditText) container.findViewById(R.id.uname);
-        unamer = (TextView) container.findViewById(R.id.unamehead);
-        uemail = (TextView) container.findViewById(R.id.uemailhead);
-        pass = (EditText) container.findViewById(R.id.upass);
+        View view = inflater.inflate(R.layout.fragment_register,
+                container, false);
+        login_btn = (Button) view.findViewById(R.id.login);
+        user = (EditText) view.findViewById(R.id.uname);
+        unamer = (TextView) view.findViewById(R.id.unamehead);
+        uemail = (TextView) view.findViewById(R.id.uemailhead);
+        pass = (EditText) view.findViewById(R.id.upass);
 
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity(),"Welcome "+user.getText().toString() ,Toast.LENGTH_SHORT).show();
-                unamer.setText(""+user);
-                uemail.setText(""+user+"@gmail.com");
+//                unamer.setText(""+user);
+//                uemail.setText(""+user+"@gmail.com");
             }
         });
 
-        return inflater.inflate(R.layout.fragment_register,container,false);
+        return view;
     }
 }

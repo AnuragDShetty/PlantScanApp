@@ -19,7 +19,9 @@ public class SigninFragment extends Fragment {
     @Override
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        registerbutton=(Button)container.findViewById(R.id.Register);
+        View view = inflater.inflate(R.layout.fragment_signin,
+                container, false);
+        registerbutton=(Button)view.findViewById(R.id.Register);
 
         registerbutton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -27,7 +29,7 @@ public class SigninFragment extends Fragment {
                 Toast.makeText(getActivity(),"Registration done",Toast.LENGTH_SHORT).show();
             }
         });
-        return inflater.inflate(R.layout.fragment_signin,container,false);
+        return view;
 
 
     }
