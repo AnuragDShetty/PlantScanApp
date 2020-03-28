@@ -80,10 +80,10 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new HomeFragment()).commit();
         }  else if (id == R.id.nav_signup) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new RegisterFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new SigninFragment()).commit();
 
         } else if (id == R.id.nav_login) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new SigninFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new RegisterFragment()).commit();
         }
         else if (id == R.id.nav_history) {
             Toast.makeText(MainActivity.this,"History selected",Toast.LENGTH_SHORT).show();
