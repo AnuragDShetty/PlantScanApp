@@ -3,4 +3,6 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="APPNAME">#108B00</color>
+    <color name="PROMPT_OPTN">#0CA701</color>
 </resources>
