@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new RegisterFragment()).commit();
         }
         else if (id == R.id.nav_history) {
-            Toast.makeText(MainActivity.this,"History selected",Toast.LENGTH_SHORT).show();
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new HistoryFragment()).commit();
         }
 
