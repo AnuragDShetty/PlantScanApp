@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.plantscanapp.helpers.UserDisplayHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +61,7 @@ public class RegisterFragment extends Fragment {
         regname=(EditText)view.findViewById(R.id.uregname);
         regemail=(EditText)view.findViewById(R.id.uregemail);
         regpass=(EditText)view.findViewById(R.id.uregpass);
+
         queue= Volley.newRequestQueue(getContext());
 
         registerbutton.setOnClickListener(new View.OnClickListener() {
@@ -82,7 +85,12 @@ public class RegisterFragment extends Fragment {
         sug1=prompt.findViewById(R.id.suggestion1);
         sug2=prompt.findViewById(R.id.suggestion2);
 
-        message.setText("Are you sure you want to register with name: "+name+" and email: "+email+" ?");
+        String def="#####";
+        SharedPreferences sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+        if(sharedPreferences.getString("email",def)==def)
+            message.setText("Are you sure you want to register with name: "+name+" and email: "+email+" ?");
+        else
+            message.setText("WARNING: You are already logged in using "+sharedPreferences.getString("email",def)+"\n\nIf you register a new account then the previous account will be logged off and the newly created account will be in use.\n\nAre you sure you want to register with\nname: "+name+"\nemail: "+email+" ?");
         sug1.setText("Yes");
         sug2.setText("No");
 
@@ -117,10 +125,12 @@ public class RegisterFragment extends Fragment {
                             Toast.makeText(getActivity(), "Successfully registered.", Toast.LENGTH_SHORT).show();
                             SharedPreferences.Editor editor=sharedPreferences.edit();
                             editor.putString("email",email);
+                            editor.putString("name",name);
                             editor.commit();
                             regemail.setText("");
                             regpass.setText("");
                             regname.setText("");
+                            setUserDataToNav();
                         }else if(response.equals("0")){
                             Toast.makeText(getActivity(), "Email is already registered.", Toast.LENGTH_SHORT).show();
                             regemail.setText("");
@@ -147,4 +157,22 @@ public class RegisterFragment extends Fragment {
         queue.add(stringRequest);
     }
 
+    public void setUserDataToNav(){
+        String def="#####";
+        SharedPreferences sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+        ImageView im=(ImageView)getActivity().findViewById(R.id.imageView);
+        TextView name=(TextView)getActivity().findViewById(R.id.unamehead);
+        TextView email=(TextView)getActivity().findViewById(R.id.uemailhead);
+        if(sharedPreferences.getString("name",def)==def){
+            im.setImageDrawable(getResources().getDrawable(R.drawable.default_user));
+            name.setText("Not Logged In");
+            email.setText("");
+        }else{
+            UserDisplayHelper userDisplayHelper=new UserDisplayHelper();
+            String uname=sharedPreferences.getString("name",def);
+            im.setImageBitmap(userDisplayHelper.createImage(150,150,1,(uname.charAt(0)+"").toUpperCase()));
+            name.setText(uname);
+            email.setText(sharedPreferences.getString("email",def));
+        }
+    }
 }

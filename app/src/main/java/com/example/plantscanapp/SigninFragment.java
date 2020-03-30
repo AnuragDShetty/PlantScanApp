@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.plantscanapp.helpers.UserDisplayHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,8 +111,10 @@ public class SigninFragment extends Fragment {
             public void onClick(View view1) {
                 SharedPreferences.Editor editor=sharedPreferences.edit();
                 editor.remove("email");
+                editor.remove("name");
                 editor.commit();
                 checkUser(view);
+                setUserDataToNav();
                 prompt.dismiss();
             }
         });
@@ -147,18 +151,20 @@ public class SigninFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         progress.dismiss();
-                        if(response.equals("1")){
+                        if(response.equals("0")){
+                            Toast.makeText(getActivity(), "Please check the email and password", Toast.LENGTH_SHORT).show();
+                            email.setText("");
+                            pass.setText("");
+                        }else{
                             Toast.makeText(getActivity(), "Successfully logged in.", Toast.LENGTH_SHORT).show();
                             SharedPreferences.Editor editor=sharedPreferences.edit();
                             editor.putString("email",uemail);
+                            editor.putString("name",response);
                             editor.commit();
                             email.setText("");
                             pass.setText("");
                             checkUser(view);
-                        }else if(response.equals("0")){
-                            Toast.makeText(getActivity(), "Please check the email and password", Toast.LENGTH_SHORT).show();
-                            email.setText("");
-                            pass.setText("");
+                            setUserDataToNav();
                         }
                     }
                 },
@@ -178,5 +184,25 @@ public class SigninFragment extends Fragment {
             }
         };
         queue.add(stringRequest);
+    }
+
+
+    public void setUserDataToNav(){
+        String def="#####";
+        SharedPreferences sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+        ImageView im=(ImageView)getActivity().findViewById(R.id.imageView);
+        TextView name=(TextView)getActivity().findViewById(R.id.unamehead);
+        TextView email=(TextView)getActivity().findViewById(R.id.uemailhead);
+        if(sharedPreferences.getString("name",def)==def){
+            im.setImageDrawable(getResources().getDrawable(R.drawable.default_user));
+            name.setText("Not Logged In");
+            email.setText("");
+        }else{
+            UserDisplayHelper userDisplayHelper=new UserDisplayHelper();
+            String uname=sharedPreferences.getString("name",def);
+            im.setImageBitmap(userDisplayHelper.createImage(150,150,1,(uname.charAt(0)+"").toUpperCase()));
+            name.setText(uname);
+            email.setText(sharedPreferences.getString("email",def));
+        }
     }
 }

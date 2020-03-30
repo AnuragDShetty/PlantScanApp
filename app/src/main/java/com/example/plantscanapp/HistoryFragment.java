@@ -1,5 +1,6 @@
 package com.example.plantscanapp;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -37,6 +38,8 @@ public class HistoryFragment extends Fragment {
     RequestQueue queue;
     List<HistoryModel> historyModelList=new ArrayList<>();
     HistoryAdapter adapter;
+    ProgressDialog progress;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -45,6 +48,9 @@ public class HistoryFragment extends Fragment {
         queue=Volley.newRequestQueue(getContext());
         listView=(ListView)view.findViewById(R.id.historyList);
         message=(TextView)view.findViewById(R.id.message);
+        progress = new ProgressDialog(getContext());
+        progress.setTitle("Loading");
+        progress.setMessage("Just a Moment");
 
         int loggedin=1;
         if(loggedin==1){
@@ -58,7 +64,7 @@ public class HistoryFragment extends Fragment {
         }else{
             listView.setVisibility(View.INVISIBLE);
         }
-
+        progress.show();
         getHistory();
 
         return view;
@@ -70,6 +76,7 @@ public class HistoryFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progress.dismiss();
                         try {
                             JSONObject json = new JSONObject(response);
                             JSONArray jarray=json.getJSONArray("history");
@@ -91,7 +98,12 @@ public class HistoryFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getActivity(), ""+error, Toast.LENGTH_SHORT).show();
+                        progress.dismiss();
+                        try {
+                            Toast.makeText(getActivity(), "" + error, Toast.LENGTH_SHORT).show();
+                        }catch(NullPointerException e){
+                            e.printStackTrace();
+                        }
                     }
                 })
         {

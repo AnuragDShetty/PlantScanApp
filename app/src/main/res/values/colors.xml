@@ -5,4 +5,8 @@
     <color name="colorAccent">#D81B60</color>
     <color name="APPNAME">#108B00</color>
     <color name="PROMPT_OPTN">#0CA701</color>
+    <color name="WARNING">#FF0505</color>
+    <color name="START">#F7FAF6</color>
+    <color name="END">#EBFFEB</color>
+    <color name="RIPPLE">#A7A7A7</color>
 </resources>

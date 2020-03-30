@@ -1,5 +1,6 @@
 package com.example.plantscanapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,7 +14,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.plantscanapp.helpers.UserDisplayHelper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -36,6 +41,7 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
+
     }
 
     @Override
@@ -52,7 +58,29 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        setUserDataToNav();
+
         return true;
+    }
+
+    public void setUserDataToNav(){
+        String def="#####";
+        SharedPreferences sharedPreferences=getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+        ImageView im=(ImageView)findViewById(R.id.imageView);
+        TextView name=(TextView)findViewById(R.id.unamehead);
+        TextView email=(TextView)findViewById(R.id.uemailhead);
+        if(sharedPreferences.getString("name",def)==def){
+            im.setImageDrawable(getResources().getDrawable(R.drawable.default_user));
+            name.setText("Not Logged In");
+            email.setText("");
+        }else{
+            UserDisplayHelper userDisplayHelper=new UserDisplayHelper();
+            String uname=sharedPreferences.getString("name",def);
+            im.setImageBitmap(userDisplayHelper.createImage(150,150,1,(uname.charAt(0)+"").toUpperCase()));
+            name.setText(uname);
+            email.setText(sharedPreferences.getString("email",def));
+        }
     }
 
     @Override
