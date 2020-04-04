@@ -1,6 +1,7 @@
 package com.example.plantscanapp;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class HistoryFragment extends Fragment {
     ListView listView;
     TextView message;
@@ -39,6 +42,7 @@ public class HistoryFragment extends Fragment {
     List<HistoryModel> historyModelList=new ArrayList<>();
     HistoryAdapter adapter;
     ProgressDialog progress;
+    SharedPreferences sharedPreferences;
 
     @Nullable
     @Override
@@ -51,26 +55,22 @@ public class HistoryFragment extends Fragment {
         progress = new ProgressDialog(getContext());
         progress.setTitle("Loading");
         progress.setMessage("Just a Moment");
+        sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+        String def="######";
 
-        int loggedin=1;
-        if(loggedin==1){
-            message.setVisibility(View.INVISIBLE);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Toast.makeText(getActivity(), ""+historyModelList.get(i).getName(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }else{
+        if(sharedPreferences.getString("email",def).equals(def)){
             listView.setVisibility(View.INVISIBLE);
+            message.setVisibility(View.VISIBLE);
+            message.setText("You need to be logged in to view your history.");
+        }else{
+            progress.show();
+            getHistory(sharedPreferences.getString("email",def));
         }
-        progress.show();
-        getHistory();
 
         return view;
     }
 
-    private void getHistory() {
+    private void getHistory(final String email) {
         String url="https://try-26-ifl.herokuapp.com/history";
         StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -80,16 +80,30 @@ public class HistoryFragment extends Fragment {
                         try {
                             JSONObject json = new JSONObject(response);
                             JSONArray jarray=json.getJSONArray("history");
-                            for(int i=0;i<jarray.length();i++){
-                                JSONObject data=jarray.getJSONObject(i);
-                                HistoryModel history=new HistoryModel();
-                                history.setName(data.getString("history"));
-                                history.setDate("date");
-                                historyModelList.add(history);
+                            if(jarray.length()==0){
+                                listView.setVisibility(View.INVISIBLE);
+                                message.setVisibility(View.VISIBLE);
+                                message.setText("No history to show.");
+                            }else {
+                                message.setVisibility(View.INVISIBLE);
+                                listView.setVisibility(View.VISIBLE);
+                                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                        Toast.makeText(getActivity(), ""+historyModelList.get(i).getName(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                for (int i = 0; i < jarray.length(); i++) {
+                                    JSONObject data = jarray.getJSONObject(i);
+                                    HistoryModel history = new HistoryModel();
+                                    history.setName(data.getString("history"));
+                                    history.setDate("date");
+                                    historyModelList.add(history);
+                                }
+                                adapter = new HistoryAdapter(getActivity(), historyModelList);
+                                listView.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
                             }
-                            adapter=new HistoryAdapter(getActivity(),historyModelList);
-                            listView.setAdapter(adapter);
-                            adapter.notifyDataSetChanged();
                         }catch (JSONException e){
                             e.printStackTrace();
                         }
@@ -110,7 +124,7 @@ public class HistoryFragment extends Fragment {
             @Override
             protected Map<String,String> getParams()throws AuthFailureError {
                 Map<String,String> parms=new HashMap<String, String>();
-                parms.put("email","krishna");
+                parms.put("email",email);
                 return parms;
             }
         };

@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 public class HomeFragment extends Fragment {
 
-    ImageView image;
+    ImageView image,fab;
     Button submit;
     Dialog prompt;
     int loggin=0;
@@ -27,6 +27,14 @@ public class HomeFragment extends Fragment {
 
         image=(ImageView)view.findViewById(R.id.image);
         submit=(Button)view.findViewById(R.id.subBtn);
+        fab=(ImageView)view.findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showHelp();
+            }
+        });
 
         prompt=new Dialog(getContext());
 
@@ -42,6 +50,19 @@ public class HomeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void showHelp() {
+
+        prompt.setContentView(R.layout.prompt_help);
+        TextView close=(TextView)prompt.findViewById(R.id.helpClose);
+        prompt.show();
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                prompt.dismiss();
+            }
+        });
     }
 
     private void submitImage() {

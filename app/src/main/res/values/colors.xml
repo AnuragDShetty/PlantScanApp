@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorPrimary">#008000</color>
+    <color name="colorPrimaryDark">#035700</color>
     <color name="colorAccent">#D81B60</color>
     <color name="APPNAME">#108B00</color>
     <color name="PROMPT_OPTN">#0CA701</color>
@@ -9,4 +9,5 @@
     <color name="START">#F7FAF6</color>
     <color name="END">#EBFFEB</color>
     <color name="RIPPLE">#A7A7A7</color>
+    <color name="NAV_TEXT">#FFFFFF</color>
 </resources>

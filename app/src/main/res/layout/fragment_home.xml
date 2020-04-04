@@ -35,4 +35,13 @@
         android:layout_marginBottom="25sp"
         />
 
+    <ImageView
+        android:id="@+id/fab"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20sp"
+        android:src="@drawable/question" />
+
 </RelativeLayout>

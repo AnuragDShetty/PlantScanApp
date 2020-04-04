@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HELP"
+        android:textStyle="bold"
+        android:textSize="25dp"
+        android:layout_marginTop="15sp"
+        android:layout_marginBottom="5sp"
+        android:layout_centerHorizontal="true"/>
+    <TextView
+        android:id="@+id/cont"
+        android:layout_below="@id/head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/HELP"
+        android:textSize="20sp"
+        android:padding="20sp"/>
+
+    <TextView
+        android:id="@+id/helpClose"
+        android:layout_below="@id/cont"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/PROMPT_OPTN"
+        android:text="OK"
+        android:textSize="20sp"
+        android:layout_marginTop="10sp"
+        android:layout_marginBottom="20sp"/>
+
+</RelativeLayout>
+
+
+

@@ -7,10 +7,12 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
-    <string name="menu_share">Share</string>
-    <string name="menu_send">Send</string>
+    <string name="MENU_HOME">Home</string>
+    <string name="MENU_LOGIN">Login</string>
+    <string name="MENU_REGISTRATION">Registration</string>
+    <string name="MENU_HISTORY">History</string>
+
+    <string name="LOGGED_IN">You are already logged in as</string>
+    <string name="LOGOUT_PROMPT">Click here to Log Out</string>
+    <string name="HELP">1) Click on the image to take a photo of the leaf containing visible indication of diseases.\n2) Then click on the submit button. The image will be sent for processing (This will require Internet connection).\n3) After the processing the result will be displayed on your screen. </string>
 </resources>

@@ -37,7 +37,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class SigninFragment extends Fragment {
 
     Button login_btn;
-    TextView unamer,uemail,logout,loginmsg;
+    TextView unamer,uemail,logout,loginEmail,loginUser;
     EditText email,pass;
     ProgressDialog progress;
     SharedPreferences sharedPreferences;
@@ -62,7 +62,8 @@ public class SigninFragment extends Fragment {
         email = (EditText) view.findViewById(R.id.uemail);
         pass = (EditText) view.findViewById(R.id.upass);
         logout=(TextView)view.findViewById(R.id.logout);
-        loginmsg=(TextView)view.findViewById(R.id.loggedInMessage);
+        loginEmail=(TextView)view.findViewById(R.id.loggedInEmail);
+        loginUser=(TextView)view.findViewById(R.id.loggedInUser);
 
         progress = new ProgressDialog(getContext());
         progress.setTitle("Logging in");
@@ -138,7 +139,8 @@ public class SigninFragment extends Fragment {
             ll.setVisibility(View.VISIBLE);
         }else{
             ll.setVisibility(View.INVISIBLE);
-            loginmsg.setText("Already logged in with:\nemail: "+sharedPreferences.getString("email",def));
+            loginEmail.setText(sharedPreferences.getString("email",def));
+            loginUser.setText(sharedPreferences.getString("name",def));
             rl.setVisibility(View.VISIBLE);
         }
     }
