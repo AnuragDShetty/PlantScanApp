@@ -9,6 +9,7 @@
         android:layout_height="300sp"
         android:layout_centerHorizontal="true"
         android:layout_margin="30sp"
+        android:background="@drawable/image_picker"
         />
     <Button
         android:id="@+id/subBtn"
@@ -22,6 +23,7 @@
         android:textColor="#FFFFFF"
         android:paddingLeft="25sp"
         android:paddingRight="25sp"
+        android:layout_marginTop="20sp"
         />
     <TextView
         android:layout_width="wrap_content"

@@ -4,10 +4,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/registrationLayout"
         android:layout_width="match_parent"
         android:layout_height="516sp"
         android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
 
 
         <TextView
@@ -90,6 +92,8 @@
             android:text="Register"
             />
     </LinearLayout>
+
+    <include layout="@layout/already_logged_in"/>
 
 
     <TextView

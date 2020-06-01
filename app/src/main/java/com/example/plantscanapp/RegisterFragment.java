@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,24 +37,28 @@ public class RegisterFragment extends Fragment {
 
 
     EditText regname,regemail,regpass;
+    TextView logout;
     Button registerbutton;
     RequestQueue queue;
     SharedPreferences sharedPreferences;
     ProgressDialog progress;
     Dialog prompt;
+    String def="#####";
+    View view;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_register,
+        view = inflater.inflate(R.layout.fragment_register,
                 container, false);
 
         NavigationView navigationView =getActivity().findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_signup);
 
+        queue= Volley.newRequestQueue(getContext());
         sharedPreferences = getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
-
         prompt=new Dialog(getContext());
+
         progress = new ProgressDialog(getContext());
         progress.setTitle("Registering");
         progress.setMessage("Just a Moment");
@@ -61,8 +67,9 @@ public class RegisterFragment extends Fragment {
         regname=(EditText)view.findViewById(R.id.uregname);
         regemail=(EditText)view.findViewById(R.id.uregemail);
         regpass=(EditText)view.findViewById(R.id.uregpass);
+        logout=(TextView)view.findViewById(R.id.logout);
 
-        queue= Volley.newRequestQueue(getContext());
+        checkUser();
 
         registerbutton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,7 +82,66 @@ public class RegisterFragment extends Fragment {
                 else prompt(name,email,pass);
             }
         });
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view1) {
+                promptLogout(view);
+            }
+        });
+
         return view;
+    }
+
+    private void promptLogout(final View view) {
+        TextView message,sug1,sug2;
+        prompt.setContentView(R.layout.prompt_template);
+        message=prompt.findViewById(R.id.message);
+        sug1=prompt.findViewById(R.id.suggestion1);
+        sug2=prompt.findViewById(R.id.suggestion2);
+
+        message.setText("Are you sure you want to log out?");
+        sug1.setText("Yes");
+        sug2.setText("No");
+
+        sug1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view1) {
+                SharedPreferences.Editor editor=sharedPreferences.edit();
+                editor.remove("email");
+                editor.remove("name");
+                editor.commit();
+                checkUser();
+                setUserDataToNav();
+                prompt.dismiss();
+            }
+        });
+
+        sug2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                prompt.dismiss();
+            }
+        });
+
+        prompt.show();
+    }
+
+
+    private void checkUser() {
+        LinearLayout ll=(LinearLayout)view.findViewById(R.id.registrationLayout);
+        RelativeLayout rl=(RelativeLayout)view.findViewById(R.id.messageLayout);
+        if(sharedPreferences.getString("email",def)==def){
+            rl.setVisibility(View.INVISIBLE);
+            ll.setVisibility(View.VISIBLE);
+        }else{
+            TextView loginEmail=(TextView)view.findViewById(R.id.loggedInEmail);
+            TextView loginUser=(TextView)view.findViewById(R.id.loggedInUser);
+            ll.setVisibility(View.INVISIBLE);
+            loginEmail.setText(sharedPreferences.getString("email",def));
+            loginUser.setText(sharedPreferences.getString("name",def));
+            rl.setVisibility(View.VISIBLE);
+        }
     }
 
     private void prompt(final String name,final String email,final String pass) {
@@ -85,8 +151,6 @@ public class RegisterFragment extends Fragment {
         sug1=prompt.findViewById(R.id.suggestion1);
         sug2=prompt.findViewById(R.id.suggestion2);
 
-        String def="#####";
-        SharedPreferences sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
         if(sharedPreferences.getString("email",def)==def)
             message.setText("Are you sure you want to register with name: "+name+" and email: "+email+" ?");
         else
@@ -130,6 +194,7 @@ public class RegisterFragment extends Fragment {
                             regemail.setText("");
                             regpass.setText("");
                             regname.setText("");
+                            checkUser();
                             setUserDataToNav();
                         }else if(response.equals("0")){
                             Toast.makeText(getActivity(), "Email is already registered.", Toast.LENGTH_SHORT).show();
@@ -158,8 +223,6 @@ public class RegisterFragment extends Fragment {
     }
 
     public void setUserDataToNav(){
-        String def="#####";
-        SharedPreferences sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
         ImageView im=(ImageView)getActivity().findViewById(R.id.imageView);
         TextView name=(TextView)getActivity().findViewById(R.id.unamehead);
         TextView email=(TextView)getActivity().findViewById(R.id.uemailhead);

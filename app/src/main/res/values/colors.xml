@@ -10,4 +10,5 @@
     <color name="END">#EBFFEB</color>
     <color name="RIPPLE">#A7A7A7</color>
     <color name="NAV_TEXT">#FFFFFF</color>
+    <color name="BLACK">#000</color>
 </resources>

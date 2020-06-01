@@ -1,5 +1,6 @@
 package com.example.plantscanapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -42,6 +43,11 @@ public class MainActivity extends AppCompatActivity
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
     }
 
     @Override

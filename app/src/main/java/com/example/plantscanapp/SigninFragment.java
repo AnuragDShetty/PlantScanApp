@@ -37,19 +37,19 @@ import static android.content.Context.MODE_PRIVATE;
 public class SigninFragment extends Fragment {
 
     Button login_btn;
-    TextView unamer,uemail,logout,loginEmail,loginUser;
+    TextView unamer,uemail,logout;
     EditText email,pass;
     ProgressDialog progress;
     SharedPreferences sharedPreferences;
     RequestQueue queue;
     Dialog prompt;
+    View view;
 
     @Nullable
     @Override
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_signin,
-                container, false);
+        view = inflater.inflate(R.layout.fragment_signin, container, false);
 
         NavigationView navigationView =getActivity().findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_login);
@@ -62,17 +62,12 @@ public class SigninFragment extends Fragment {
         email = (EditText) view.findViewById(R.id.uemail);
         pass = (EditText) view.findViewById(R.id.upass);
         logout=(TextView)view.findViewById(R.id.logout);
-        loginEmail=(TextView)view.findViewById(R.id.loggedInEmail);
-        loginUser=(TextView)view.findViewById(R.id.loggedInUser);
 
         progress = new ProgressDialog(getContext());
         progress.setTitle("Logging in");
         progress.setMessage("Just a Moment");
 
-        unamer = (TextView) getActivity().findViewById(R.id.unamehead);
-        uemail = (TextView) getActivity().findViewById(R.id.uemailhead);
-
-        checkUser(view);
+        checkUser();
 
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,21 +77,21 @@ public class SigninFragment extends Fragment {
                 upass=pass.getText().toString();
                 if(uemail.equals("") || !uemail.contains("@") || upass.equals("")){
                     Toast.makeText(getActivity(), "Please enter valid data in the fields", Toast.LENGTH_SHORT).show();
-                }else login(uemail,upass,view);
+                }else login(uemail,upass);
             }
         });
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view1) {
-                prompt(view);
+                promptLogout(view);
             }
         });
 
         return view;
     }
 
-    private void prompt(final View view) {
+    private void promptLogout(final View view) {
         TextView message,sug1,sug2;
         prompt.setContentView(R.layout.prompt_template);
         message=prompt.findViewById(R.id.message);
@@ -114,7 +109,7 @@ public class SigninFragment extends Fragment {
                 editor.remove("email");
                 editor.remove("name");
                 editor.commit();
-                checkUser(view);
+                checkUser();
                 setUserDataToNav();
                 prompt.dismiss();
             }
@@ -130,7 +125,7 @@ public class SigninFragment extends Fragment {
         prompt.show();
     }
 
-    private void checkUser(View view) {
+    private void checkUser() {
         String def="#####";
         LinearLayout ll=(LinearLayout)view.findViewById(R.id.loginLayout);
         RelativeLayout rl=(RelativeLayout)view.findViewById(R.id.messageLayout);
@@ -138,6 +133,8 @@ public class SigninFragment extends Fragment {
             rl.setVisibility(View.INVISIBLE);
             ll.setVisibility(View.VISIBLE);
         }else{
+            TextView loginEmail=(TextView)view.findViewById(R.id.loggedInEmail);
+            TextView loginUser=(TextView)view.findViewById(R.id.loggedInUser);
             ll.setVisibility(View.INVISIBLE);
             loginEmail.setText(sharedPreferences.getString("email",def));
             loginUser.setText(sharedPreferences.getString("name",def));
@@ -145,7 +142,7 @@ public class SigninFragment extends Fragment {
         }
     }
 
-    private void login(final String uemail,final String upass,final View view) {
+    private void login(final String uemail,final String upass) {
         progress.show();
         String url="https://try-26-ifl.herokuapp.com/login";
         StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
@@ -165,7 +162,7 @@ public class SigninFragment extends Fragment {
                             editor.commit();
                             email.setText("");
                             pass.setText("");
-                            checkUser(view);
+                            checkUser();
                             setUserDataToNav();
                         }
                     }

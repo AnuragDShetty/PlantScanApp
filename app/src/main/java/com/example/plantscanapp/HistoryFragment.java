@@ -1,7 +1,9 @@
 package com.example.plantscanapp;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.plantscanapp.adapter.HistoryAdapter;
+import com.example.plantscanapp.model.AppDataBase;
 import com.example.plantscanapp.model.HistoryModel;
 
 import org.json.JSONArray;
@@ -56,78 +59,56 @@ public class HistoryFragment extends Fragment {
         progress.setTitle("Loading");
         progress.setMessage("Just a Moment");
         sharedPreferences=getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
-        String def="######";
 
+
+        return view;
+    }
+
+    private void getHistory() {
+        AppDataBase adb=new AppDataBase(getContext());
+        Cursor c=adb.getAllData();
+
+        if(c.getCount()==0){
+            progress.dismiss();
+            listView.setVisibility(View.INVISIBLE);
+            message.setVisibility(View.VISIBLE);
+            message.setText("No history to show.");
+        }else {
+            message.setVisibility(View.INVISIBLE);
+            listView.setVisibility(View.VISIBLE);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Intent intent = new Intent(getContext(),Description.class);
+                    intent.putExtra("code",historyModelList.get(i).getId());
+                    startActivity(intent);
+                }});
+            while(c.moveToNext()){
+                HistoryModel history = new HistoryModel();
+                history.setId(c.getString(0));
+                history.setName(c.getString(1));
+                history.setDate(c.getString(2));
+                historyModelList.add(history);
+            }
+            adapter = new HistoryAdapter(getActivity(), historyModelList);
+            listView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            progress.dismiss();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String def="######";
+        historyModelList.clear();
         if(sharedPreferences.getString("email",def).equals(def)){
             listView.setVisibility(View.INVISIBLE);
             message.setVisibility(View.VISIBLE);
             message.setText("You need to be logged in to view your history.");
         }else{
             progress.show();
-            getHistory(sharedPreferences.getString("email",def));
+            getHistory();
         }
-
-        return view;
-    }
-
-    private void getHistory(final String email) {
-        String url="https://try-26-ifl.herokuapp.com/history";
-        StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        progress.dismiss();
-                        try {
-                            JSONObject json = new JSONObject(response);
-                            JSONArray jarray=json.getJSONArray("history");
-                            if(jarray.length()==0){
-                                listView.setVisibility(View.INVISIBLE);
-                                message.setVisibility(View.VISIBLE);
-                                message.setText("No history to show.");
-                            }else {
-                                message.setVisibility(View.INVISIBLE);
-                                listView.setVisibility(View.VISIBLE);
-                                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                        Toast.makeText(getActivity(), ""+historyModelList.get(i).getName(), Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                                for (int i = 0; i < jarray.length(); i++) {
-                                    JSONObject data = jarray.getJSONObject(i);
-                                    HistoryModel history = new HistoryModel();
-                                    history.setName(data.getString("history"));
-                                    history.setDate("date");
-                                    historyModelList.add(history);
-                                }
-                                adapter = new HistoryAdapter(getActivity(), historyModelList);
-                                listView.setAdapter(adapter);
-                                adapter.notifyDataSetChanged();
-                            }
-                        }catch (JSONException e){
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        progress.dismiss();
-                        try {
-                            Toast.makeText(getActivity(), "" + error, Toast.LENGTH_SHORT).show();
-                        }catch(NullPointerException e){
-                            e.printStackTrace();
-                        }
-                    }
-                })
-        {
-            @Override
-            protected Map<String,String> getParams()throws AuthFailureError {
-                Map<String,String> parms=new HashMap<String, String>();
-                parms.put("email",email);
-                return parms;
-            }
-        };
-        queue.add(stringRequest);
     }
 }

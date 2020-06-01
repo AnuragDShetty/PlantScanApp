@@ -1,29 +1,75 @@
 package com.example.plantscanapp;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.plantscanapp.model.AppDataBase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 
 public class HomeFragment extends Fragment {
 
     ImageView image,fab;
     Button submit;
-    Dialog prompt;
-    int loggin=0;
+    Dialog prompt,selectionMode;
+    RequestQueue queue;
+    SharedPreferences sharedPreferences;
+    int loggin=1;
+    private static final int CAMERA_REQUEST = 2000;
+    private static final int DIRECTORY_REQUEST=3000;
+    String sendData="";
+    ProgressDialog progress;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view= inflater.inflate(R.layout.fragment_home,container,false);
+
+        queue= Volley.newRequestQueue(getContext());
+        sharedPreferences = getActivity().getSharedPreferences("PlantScanApp", MODE_PRIVATE);
+
+        progress = new ProgressDialog(getContext());
+        progress.setTitle("Loading");
+        progress.setMessage("Just a Moment");
+
 
         image=(ImageView)view.findViewById(R.id.image);
         submit=(Button)view.findViewById(R.id.subBtn);
@@ -37,19 +83,123 @@ public class HomeFragment extends Fragment {
         });
 
         prompt=new Dialog(getContext());
+        selectionMode=new Dialog(getContext());
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(loggin==1){
-                    submitImage();
-                }else{
+                String def="#####";
+                if(sharedPreferences.getString("email",def).equals(def)){
                     promptLogin();
+                }else{
+                    if(sendData.length()!=0) {
+                        progress.show();
+                        submitImage();
+                    }
+                    else{
+                        Toast.makeText(getActivity(), "Pick an Image to send.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
 
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String def="#####";
+                if(sharedPreferences.getString("email",def).equals(def)){
+                    promptLogin();
+                }else
+                    selectMode();
+                }
+        });
+
         return view;
+    }
+
+    private void selectMode() {
+        ImageView dir,cam;
+        selectionMode.setContentView(R.layout.image_source_selector);
+        dir=selectionMode.findViewById(R.id.imgdir);
+        cam=selectionMode.findViewById(R.id.imgcam);
+        dir.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectionMode.dismiss();
+                launchDirectory();
+            }
+        });
+
+        cam.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onClick(View view) {
+                selectionMode.dismiss();
+                launchCamera();
+            }
+        });
+        selectionMode.show();
+    }
+
+    private void launchCamera(){
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
+        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+    }
+
+    private void launchDirectory() {
+        Intent i=new Intent();
+        i.setType("image/*");
+        i.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(i,"pick image"),DIRECTORY_REQUEST);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bitmap bm = getSquareBitmap((Bitmap) data.getExtras().get("data"));
+            image.setImageBitmap(bm);
+            sendData = BitMapToString(bm);
+        }
+        else if(requestCode==DIRECTORY_REQUEST && resultCode==RESULT_OK){
+            Uri uri=data.getData();
+            InputStream is=null;
+            try{
+                is=getActivity().getContentResolver().openInputStream(uri);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            Bitmap bm= getSquareBitmap(BitmapFactory.decodeStream(is));
+            image.setImageBitmap(bm);
+            sendData = BitMapToString(bm);
+        }
+
+    }
+
+    public Bitmap getSquareBitmap(Bitmap bm){
+        int height=bm.getHeight();
+        int width=bm.getWidth();
+        if(width<=height){
+            int y=(height/2)-(width/2);
+            int x=0;
+            bm = Bitmap.createBitmap(bm,x,y,width, width);
+        }else{
+            int y=0;
+            int x=(width/2)-(height/2);
+            bm = Bitmap.createBitmap(bm,x,y,height, height);
+        }
+        return bm;
+    }
+
+    public String BitMapToString(Bitmap bitmap){
+        ByteArrayOutputStream baos=new  ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
+        byte [] b=baos.toByteArray();
+        String temp= Base64.encodeToString(b, Base64.DEFAULT);
+        return temp;
     }
 
     private void showHelp() {
@@ -66,8 +216,48 @@ public class HomeFragment extends Fragment {
     }
 
     private void submitImage() {
+        String url="http://ec2-3-133-94-145.us-east-2.compute.amazonaws.com";
+        StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progress.dismiss();
+                        try{
+                            JSONObject data=new JSONObject(response);
+                            if(data.getString("error").equals("yes")){
+                                Toast.makeText(getActivity(), "Some error occurred", Toast.LENGTH_SHORT).show();
+                            }else{
+                                String code=data.getString("result");
+                                String probs=data.getString("probs");
+                                Intent i = new Intent(getContext(),Description.class);
+                                i.putExtra("code",code);
+                                i.putExtra("probs",probs);
+                                startActivity(i);
+                            }
+                        }catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.dismiss();
+                        Toast.makeText(getActivity(), ""+error, Toast.LENGTH_SHORT).show();
+                    }
+                }){
+            @Override
+            protected Map<String,String> getParams()throws AuthFailureError {
+                Map<String,String> params=new HashMap<String, String>();
+                params.put("image",sendData);
+                return params;
+            }
+        };
+        queue.add(stringRequest);
     }
 
+
+    //prompts to login if the user hasnt done that and tries to test an image.
     private void promptLogin() {
         TextView message,sug1,sug2;
         prompt.setContentView(R.layout.prompt_template);

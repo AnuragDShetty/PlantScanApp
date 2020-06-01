@@ -50,7 +50,7 @@ public class HistoryAdapter extends BaseAdapter {
         final HistoryModel hm=list.get(i);
 
         name.setText(hm.getName());
-        date.setText(hm.getDate());
+        date.setText("Last Searched on : "+hm.getDate());
 
         return view;
     }
