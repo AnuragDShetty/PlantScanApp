@@ -224,11 +224,11 @@ public class HomeFragment extends Fragment {
                         progress.dismiss();
                         try{
                             JSONObject data=new JSONObject(response);
-                            if(data.getString("error").equals("yes")){
+                            if(data.getString("error").equals("YES")){
                                 Toast.makeText(getActivity(), "Some error occurred", Toast.LENGTH_SHORT).show();
                             }else{
                                 String code=data.getString("result");
-                                String probs=data.getString("probs");
+                                String probs=data.getString("prob");
                                 Intent i = new Intent(getContext(),Description.class);
                                 i.putExtra("code",code);
                                 i.putExtra("probs",probs);
