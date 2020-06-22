@@ -10,10 +10,14 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
+import android.support.v4.graphics.BitmapCompat;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +40,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +64,9 @@ public class HomeFragment extends Fragment {
     private static final int DIRECTORY_REQUEST=3000;
     String sendData="";
     ProgressDialog progress;
+    String currentPhotoPath;
+
+    int bitmapByteCount=0;
 
 
     @Nullable
@@ -142,9 +153,31 @@ public class HomeFragment extends Fragment {
     }
 
     private void launchCamera(){
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                Toast.makeText(getActivity(), "Permission not granted.", Toast.LENGTH_SHORT).show();
+            }
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getContext(),
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
+            }
+        }
+    }
 
-        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     private void launchDirectory() {
@@ -154,15 +187,44 @@ public class HomeFragment extends Fragment {
         startActivityForResult(Intent.createChooser(i,"pick image"),DIRECTORY_REQUEST);
     }
 
+    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap bm = getSquareBitmap((Bitmap) data.getExtras().get("data"));
+            File f=new File(currentPhotoPath);
+            Uri uri=Uri.fromFile(f);
+            InputStream is=null;
+            try{
+                is=getActivity().getContentResolver().openInputStream(uri);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            Bitmap bm= getSquareBitmap(getResizedBitmap(BitmapFactory.decodeStream(is),1000));
+            bitmapByteCount= BitmapCompat.getAllocationByteCount(bm);
+
             image.setImageBitmap(bm);
             sendData = BitMapToString(bm);
+//                File f=new File(currentPhotoPath);
+//                image.setImageURI(Uri.fromFile(f));
+//            Bitmap bm = getSquareBitmap((Bitmap) data.getExtras().get("data"));
+//            image.setImageBitmap(bm);
+//            sendData = BitMapToString(bm);
         }
         else if(requestCode==DIRECTORY_REQUEST && resultCode==RESULT_OK){
             Uri uri=data.getData();
