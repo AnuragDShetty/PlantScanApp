@@ -278,7 +278,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void submitImage() {
-        String url="http://ec2-3-133-94-145.us-east-2.compute.amazonaws.com";
+        String url="http://ec2-18-220-108-110.us-east-2.compute.amazonaws.com";
         StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
